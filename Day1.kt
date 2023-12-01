@@ -17,10 +17,9 @@ class Day1 : Solver {
     private val digs = listOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
 
     // computes the value for one line with a boolean for the additional text parsing in part 2
-    // goes from left to right through the line and tries to identify digits and words (if parse)
-    //
-    // this is better than any replacement of words with digits (which I tried first) since words can
-    // overlap and overlapping letters can belong to two digits that are both needed if leftmost and rightmost ...
+    // goes from left to right through the line and identifies digits and words (for part 2)
+    // could be faster if I stop searching after first encounter and search from the right for last ...
+    // ... but given the size of input and speed seems not worth the work ...
     private fun compLine(line: String, parse: Boolean):Int {
         var c0 = -1 // int value of first digit encountered
         var c1 = 0  // int value of last digit encountered
