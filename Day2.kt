@@ -2,7 +2,6 @@ package com.sf.aoc2023
 import com.sf.aoc.*
 import kotlin.math.max
 
-// This is a template to start new days quickly
 class Day2 : Solver {
 
     override fun solve(file: String) {
