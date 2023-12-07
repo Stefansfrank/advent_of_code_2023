@@ -29,6 +29,9 @@ data class Rng(val from:Int, val to:Int) {
     // do two ranges overlap?
     fun overlap(oth:Rng) = (from <= oth.to && oth.from <= to)
 
+    // does range contain number?
+    fun contains(num:Int):Boolean = (from <= num && num <= to)
+
     // are two ranges right next to each other?
     fun adjoint(oth:Rng) = (from == oth.to + 1 || oth.from == to + 1)
 
@@ -42,6 +45,35 @@ data class Rng(val from:Int, val to:Int) {
     // determine the overlap as range
     fun cross(oth: Rng):List<Rng> = if (overlap(oth))
         listOf(Rng(max(from, oth.from), min(to, oth.to))) else listOf()
+
+    // the length of the range
+    fun length() = to - from + 1
+}
+
+// a range of numbers only defined by its limits
+// with some functions to help manipulating multiple ranges
+// without expanding them into lists
+data class LRng(val from:Long, val to:Long) {
+
+    // do two ranges overlap?
+    fun overlap(oth:LRng) = (from <= oth.to && oth.from <= to)
+
+    // does range contain number?
+    fun contains(num:Long):Boolean = (num in from..to)
+
+    // are two ranges right next to each other?
+    fun adjoint(oth:LRng) = (from == oth.to + 1 || oth.from == to + 1)
+
+    // merge two ranges into one if possible
+    fun merge(oth: LRng):List<LRng> = if (overlap(oth) || adjoint(oth))
+        listOf(LRng(min(from, oth.from), max(to, oth.to))) else listOf(this, oth)
+
+    // merge two ranges into one without checking for overlap / adjoint
+    fun mergeUnchecked(oth: LRng):LRng = LRng(min(from, oth.from), max(to, oth.to))
+
+    // determine the overlap as range
+    fun cross(oth: LRng):List<LRng> = if (overlap(oth))
+        listOf(LRng(max(from, oth.from), min(to, oth.to))) else listOf()
 
     // the length of the range
     fun length() = to - from + 1
