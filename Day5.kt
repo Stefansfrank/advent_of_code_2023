@@ -1,11 +1,10 @@
 package com.sf.aoc2023
 import com.sf.aoc.*
+import java.util.LinkedList
+import java.util.Queue
 
 class Day5 : Solver {
 
-    // This is a brut force approach for day 5 since I only had less than an hour to finish
-    // both parts. One of these days I'll code the elegant approach I have in my head
-    // Brute force finished in 12 minutes on my MacBook
     override fun solve(file: String) {
 
         // reading input
@@ -13,14 +12,9 @@ class Day5 : Solver {
         val maps: MutableList<MutableList<MapLine>> = mutableListOf()
 
         // parsing
-        var ix = -2
-        var seeds: List<Long> = listOf()
-        for (line in data) {
-            if (ix == -2) {
-                seeds = line.substring(7).split(" ").map { it.toLong() }
-                ix = -1
-                continue
-            }
+        val seeds = data[0].substring(7).split(" ").map { it.toLong() }
+        var ix = -1
+        for (line in data.drop(1)) {
             if (line.isEmpty()) continue
             if (line.endsWith("map:")) {
                 ix += 1
@@ -28,11 +22,11 @@ class Day5 : Solver {
                 continue
             }
             val mp = line.split(" ").map { it.toLong()}
-            maps[ix].add(MapLine(LRng(mp[1], mp[1]+mp[2]-1),mp[0]-mp[1]))
+            maps[ix].add(MapLine(RngL(mp[1], mp[1]+mp[2]-1),mp[0]-mp[1]))
         }
 
-        // simple approach for part 1
-        var result: MutableList<Long> = mutableListOf()
+        // simple approach mapping individual seeds for part 1
+        val result: MutableList<Long> = mutableListOf()
         for (six in seeds.indices) {
             var seed = seeds[six]
             map@for (map in maps) {
@@ -47,27 +41,37 @@ class Day5 : Solver {
         }
         println("Part 1: $red$bold${result.min()}$reset")
 
-        // brut forcing part 2 since I have no time to think today, and it's already 11:30 pm
-        // the clever approach would be to calculate the resulting ranges through the cuts at each stage
-        // and at the end only look at the lowest numbers of each final range ...
-        var minseed = 10000000000000L
-        for (six in seeds.indices step 2) {
-            println(".")
-            for (add in 0L until seeds[six+1]) {
-                var seed = seeds[six] + add
-                map@for (map in maps) {
-                    for (ml in map) {
-                        if (ml.rng.contains(seed)) {
-                            seed += ml.op
-                            continue@map
-                        }
-                    }
+        // Part 2 is taking the incoming set of ranges and applies mapping ranges to them
+        // this mapping process might cut ranges into subsequent ranges if there is only partial overlap
+
+        // initialize the queue with the given ranges
+        var rngQueue:Queue<RngL> = LinkedList()
+        for (six in seeds.indices step 2) rngQueue.add(RngL(seeds[six], seeds[six] + seeds[six+1] -1))
+
+        // for each map we build a list of mapped ranges
+        for (map in maps) {
+            val mappedRngQueue:Queue<RngL> = LinkedList()
+
+            // the individual lines of a map
+            for (ml in map) {
+                val tmpRngQueue:Queue<RngL> = LinkedList() // temporary collector for unmapped ranges
+
+                // loop through unmapped ranges
+                while (!rngQueue.isEmpty()) {
+                    val msk = rngQueue.remove().maskWith(ml.rng)
+                    tmpRngQueue.addAll(msk.unmasked)
+                    if (msk.masked != null) mappedRngQueue.add(msk.masked!!.move(ml.op))
                 }
-                if (seed < minseed) minseed = seed
+
+                rngQueue = tmpRngQueue
             }
+
+            // add newly mapped ranges to the ones not mapped at all
+            rngQueue.addAll(mappedRngQueue)
         }
-        println("Part 2: $red$bold${minseed}$reset")
+
+        println("Part 2: $red$bold${rngQueue.toList().minByOrNull { it.from }!!.from}$reset")
     }
 
-    data class MapLine(val rng: LRng, val op: Long)
+    data class MapLine(val rng: RngL, val op: Long)
 }

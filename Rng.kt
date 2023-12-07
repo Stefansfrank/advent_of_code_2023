@@ -35,6 +35,33 @@ data class Rng(val from:Int, val to:Int) {
     // are two ranges right next to each other?
     fun adjoint(oth:Rng) = (from == oth.to + 1 || oth.from == to + 1)
 
+    // shift a range
+    fun move(add:Int):Rng = Rng(this.from + add, this.to + add)
+
+    // this functionality compares (this) with a masking range. all parts of (this) that are not
+    // overlapping with the masking range will be in "unmasked" (can be 0-2 ranges). The overlap
+    // range (0-1) will be in "masked"
+    data class Mask(var masked:Rng?, var unmasked:MutableList<Rng>)
+    fun maskWith(oth:Rng):Mask {
+
+        val result = Mask(null, mutableListOf())
+        if (this.overlap(oth)) {
+            var mf = this.from; var mt = this.to
+            if (this.from < oth.from) {
+                result.unmasked.add(Rng(this.from, oth.from - 1))
+                mf = oth.from
+            }
+            if (this.to > oth.to) {
+                result.unmasked.add(Rng(oth.to + 1, this.to))
+                mt = oth.to
+            }
+            result.masked = Rng(mf, mt)
+        } else {
+            result.unmasked.add(this)
+        }
+        return result
+    }
+
     // merge two ranges into one if possible
     fun merge(oth: Rng):List<Rng> = if (overlap(oth) || adjoint(oth))
         listOf(Rng(min(from, oth.from), max(to, oth.to))) else listOf(this, oth)
@@ -53,27 +80,54 @@ data class Rng(val from:Int, val to:Int) {
 // a range of numbers only defined by its limits
 // with some functions to help manipulating multiple ranges
 // without expanding them into lists
-data class LRng(val from:Long, val to:Long) {
+data class RngL(val from:Long, val to:Long) {
 
     // do two ranges overlap?
-    fun overlap(oth:LRng) = (from <= oth.to && oth.from <= to)
+    fun overlap(oth:RngL) = (from <= oth.to && oth.from <= to)
 
     // does range contain number?
     fun contains(num:Long):Boolean = (num in from..to)
 
     // are two ranges right next to each other?
-    fun adjoint(oth:LRng) = (from == oth.to + 1 || oth.from == to + 1)
+    fun adjoint(oth:RngL) = (from == oth.to + 1 || oth.from == to + 1)
+
+    // shift a range
+    fun move(add:Long):RngL = RngL(this.from + add, this.to + add)
+
+    // this functionality compares (this) with a masking range. all parts of (this) that are not
+    // overlapping with the masking range will be in "unmasked" (can be 0-2 ranges). The overlap
+    // range (0-1) will be in "masked"
+    data class Mask(var masked:RngL?, var unmasked:MutableList<RngL>)
+    fun maskWith(oth:RngL):Mask {
+
+        val result = Mask(null, mutableListOf())
+        if (this.overlap(oth)) {
+            var mf = this.from; var mt = this.to
+            if (this.from < oth.from) {
+                result.unmasked.add(RngL(this.from, oth.from - 1))
+                mf = oth.from
+            }
+            if (this.to > oth.to) {
+                result.unmasked.add(RngL(oth.to + 1, this.to))
+                mt = oth.to
+            }
+            result.masked = RngL(mf, mt)
+        } else {
+            result.unmasked.add(this)
+        }
+        return result
+    }
 
     // merge two ranges into one if possible
-    fun merge(oth: LRng):List<LRng> = if (overlap(oth) || adjoint(oth))
-        listOf(LRng(min(from, oth.from), max(to, oth.to))) else listOf(this, oth)
+    fun merge(oth: RngL):List<RngL> = if (overlap(oth) || adjoint(oth))
+        listOf(RngL(min(from, oth.from), max(to, oth.to))) else listOf(this, oth)
 
     // merge two ranges into one without checking for overlap / adjoint
-    fun mergeUnchecked(oth: LRng):LRng = LRng(min(from, oth.from), max(to, oth.to))
+    fun mergeUnchecked(oth: RngL):RngL = RngL(min(from, oth.from), max(to, oth.to))
 
     // determine the overlap as range
-    fun cross(oth: LRng):List<LRng> = if (overlap(oth))
-        listOf(LRng(max(from, oth.from), min(to, oth.to))) else listOf()
+    fun cross(oth: RngL):List<RngL> = if (overlap(oth))
+        listOf(RngL(max(from, oth.from), min(to, oth.to))) else listOf()
 
     // the length of the range
     fun length() = to - from + 1
