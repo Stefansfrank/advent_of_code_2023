@@ -39,30 +39,12 @@ class Day7 : Solver {
     }
 
     // find best type if 'J' is Joker
-    // there is optimization potential due to testing a high number of hands that could be excluded
-    // but execution is super fast ....
+    // after thinking through the replacement options, the best replacement for 'J' is always the letter
+    // that is already most frequent in a sense that that is going to be the highest type of hand achievable
     fun bestTypeOfHand(hand: String):Long {
-        var hands = listOf(hand)
-
-        // go through letters to identify any 'J'
-        for ((ix, c) in hand.withIndex()) {
-            if (c == 'J') {
-
-                // create 12 hands for each hand that still contains 'J'
-                val newHands: MutableList<String> = mutableListOf()
-                for (hnd in hands) {
-                    for (cc in cards.keys) {
-                        if (cc != 'J') {
-                            newHands.add(hnd.substring(0, ix) + cc + hnd.substring(ix + 1))
-                        }
-                    }
-                }
-                hands = newHands
-            }
-        }
-
-        // determine maximum
-        return hands.maxOfOrNull { typeOfHand(it) }!!
+        val cnt: MutableMap<Char, Int> = mutableMapOf()
+        for (c in hand) if (c != 'J') cnt[c] = (cnt[c] ?: 0) + 1
+        return typeOfHand(hand.replace('J', if (cnt.size == 0) 'A' else cnt.maxBy { it.value }.key))
     }
 
     // calculate strength of hand for part 1 and 2

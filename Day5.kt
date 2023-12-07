@@ -70,7 +70,7 @@ class Day5 : Solver {
             rngQueue.addAll(mappedRngQueue)
         }
 
-        println("Part 2: $red$bold${rngQueue.toList().minByOrNull { it.from }!!.from}$reset")
+        println("Part 2: $red$bold${rngQueue.toList().minOfOrNull { it.from }}$reset")
     }
 
     data class MapLine(val rng: RngL, val op: Long)
