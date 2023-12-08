@@ -66,3 +66,29 @@ fun divisors(fac: List<Int>, ix: Int = 0, curr: Int = 1, divs: MutableSet<Int> =
     divisors(fac, ix+1, curr, divs)
     return divs
 }
+
+// Greatest common denominator of two numbers
+fun gcd(a: Long, b: Long):Long {
+    var y = b; var x = a
+    while (y > 0) { val tmp = y ; y = x % y; x = tmp }
+    return x
+}
+
+// Greatest common denominator of a list of numbers
+fun gcdList(inp: List<Long>):Long {
+    var result = inp[0]
+    (1 until inp.size).forEach { result = gcd(result, inp[it]) }
+    return result
+}
+
+// Least common multiplier of two numbers
+fun lcm(a:Long, b:Long):Long {
+    return a * (b / gcd(a, b));
+}
+
+// Least common multiplier of a list of numbers
+fun lcmList(inp: List<Long>): Long {
+    var result = inp[0]
+    (1 until inp.size).forEach { result = lcm(result, inp[it]) }
+    return result;
+}
