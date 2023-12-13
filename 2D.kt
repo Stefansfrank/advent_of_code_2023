@@ -141,6 +141,10 @@ class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
     // the actual map accessible with [y][x] sequence
     val mp = mutableListOf<MutableList<Int>>().apply { repeat(ydim) { this.add( MutableList(xdim) { default })} }
 
+    val rowIx = (0 until xdim).toList()
+    val colIx = (0 until ydim).toList()
+    val xyIx:List<XY> = colIx.fold(mutableListOf()) { lst, y -> (lst + rowIx.map { x -> XY(x,y)}).toMutableList()}
+
     // adds n to a whole region (defaults n = 1, region = all map)
     fun add(n: Int = 1, bx: Rect = Rect(XY(0,0), XY(xdim, ydim))) {
         mp.forEachIndexed{ y, ln -> if (y in bx.yRange())
@@ -175,6 +179,9 @@ class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
 
     // prints out a representation to stdout
     fun print() = mp.forEach { it.forEach{ i -> print(i) }; println() }
+
+    // prints out a representation to stdout
+    fun printChar() = mp.forEach { it.forEach{ i -> print(i.toChar()) }; println() }
 }
 
 // a 2D integer map of dimensions xdim, ydim
