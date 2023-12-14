@@ -190,6 +190,24 @@ class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
     // the actual map accessible with [y][x] sequence
     val mp = mutableListOf<MutableList<Char>>().apply { repeat(ydim) { this.add( MutableList(xdim) { default })} }
 
+    val rowIx = (0 until xdim).toList()
+    val colIx = (0 until ydim).toList()
+    val xyIx:List<XY> = colIx.fold(mutableListOf()) { lst, y -> (lst + rowIx.map { x -> XY(x,y)}).toMutableList()}
+
+    // adds simple XY getter / setter
+    fun get(xy:XY):Char = mp[xy.y][xy.x]
+    fun get(x:Int, y:Int) = mp[y][x]
+    fun set(xy:XY, value:Char) { mp[xy.y][xy.x] = value }
+    fun set(x:Int, y:Int, value:Char) { mp[y][x] = value }
+
+    // sets a line value
+    fun setLine(y:Int, ln:List<Char>) {
+        mp[y] = ln.toMutableList()
+    }
+
+    // prints out a representation to stdout
+    fun print() = mp.forEach { it.forEach{ i -> print(i) }; println() }
+
 }
 
 // a generic 2D map
@@ -231,6 +249,10 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
         }
     }
 }
+
+// these should be used on Directions
+fun (Int).isVertical():Boolean = (this == 1 || this == 3)
+fun (Int).isDescending():Boolean = (this == 0 || this == 3)
 
 
 
