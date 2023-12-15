@@ -46,11 +46,11 @@ data class Rng(var from:Int, var to:Int) {
     // this functionality compares (this) with a masking range. all parts of (this) that are not
     // overlapping with the masking range will be in "unmasked" (can be 0-2 ranges). The overlap
     // range (0-1) will be in "masked"
-    data class Mask(var masked:Rng?, var unmasked:MutableList<Rng>)
+    data class MaskedRanges(var masked:Rng?, var unmasked:MutableList<Rng>)
 
-    fun maskWith(oth:Rng):Mask {
+    fun maskWith(oth:Rng):MaskedRanges {
 
-        val result = Mask(null, mutableListOf())
+        val result = MaskedRanges(null, mutableListOf())
         if (this.overlap(oth)) {
             var mf = this.from; var mt = this.to
             if (this.from < oth.from) {
@@ -88,6 +88,11 @@ data class Rng(var from:Int, var to:Int) {
 // without expanding them into lists
 data class RngL(val from:Long, val to:Long) {
 
+    // this constructor uses a Pair and does reorder from/to if necessary
+    constructor(rng:Pair<Long, Long>) : this(
+        if (rng.first < rng.second) rng.first else rng.second,
+        if (rng.first > rng.second) rng.first else rng.second)
+
     // do two ranges overlap?
     fun overlap(oth:RngL) = (from <= oth.to && oth.from <= to)
 
@@ -102,11 +107,11 @@ data class RngL(val from:Long, val to:Long) {
 
     // this functionality compares (this) with a masking range. all parts of (this) that are not
     // overlapping with the masking range will be in "unmasked" (can be 0-2 ranges). The overlap
-    // range (0-1) will be in "masked"
-    data class Mask(var masked:RngL?, var unmasked:MutableList<RngL>)
-    fun maskWith(oth:RngL):Mask {
+    // range (only if overlapping) will be in "masked"
+    data class MaskedRanges(var masked:RngL?, var unmasked:MutableList<RngL>)
+    fun maskWith(oth:RngL):MaskedRanges {
 
-        val result = Mask(null, mutableListOf())
+        val result = MaskedRanges(null, mutableListOf())
         if (this.overlap(oth)) {
             var mf = this.from; var mt = this.to
             if (this.from < oth.from) {
