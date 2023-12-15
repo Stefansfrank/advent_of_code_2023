@@ -24,24 +24,30 @@ fun reduceRngs(rngs:List<Rng>):List<Rng> {
 // a range of numbers only defined by its limits
 // with some functions to help manipulating multiple ranges
 // without expanding them into lists
-data class Rng(val from:Int, val to:Int) {
+data class Rng(var from:Int, var to:Int) {
+
+    // this constructor uses a Pair and does reorder from/to if necessary
+    constructor(rng:Pair<Int, Int>) : this(
+        if (rng.first < rng.second) rng.first else rng.second,
+        if (rng.first > rng.second) rng.first else rng.second)
 
     // do two ranges overlap?
     fun overlap(oth:Rng) = (from <= oth.to && oth.from <= to)
 
     // does range contain number?
-    fun contains(num:Int):Boolean = (from <= num && num <= to)
+    fun contains(num:Int):Boolean = (num in from .. to)
 
     // are two ranges right next to each other?
     fun adjoint(oth:Rng) = (from == oth.to + 1 || oth.from == to + 1)
 
     // shift a range
-    fun move(add:Int):Rng = Rng(this.from + add, this.to + add)
+    fun move(add:Int):Rng = Rng(from + add, to + add)
 
     // this functionality compares (this) with a masking range. all parts of (this) that are not
     // overlapping with the masking range will be in "unmasked" (can be 0-2 ranges). The overlap
     // range (0-1) will be in "masked"
     data class Mask(var masked:Rng?, var unmasked:MutableList<Rng>)
+
     fun maskWith(oth:Rng):Mask {
 
         val result = Mask(null, mutableListOf())
