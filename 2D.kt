@@ -177,6 +177,10 @@ class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
        mp[y] = ln.toMutableList()
     }
 
+    fun contains(loc:XY):Boolean {
+        return (loc.x in 0 until xdim && loc.y in 0 until ydim)
+    }
+
     // prints out a representation to stdout
     fun print() = mp.forEach { it.forEach{ i -> print(i) }; println() }
 
@@ -186,6 +190,14 @@ class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
 
 // a 2D integer map of dimensions xdim, ydim
 class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
+
+    constructor(data:List<String>):this(data[0].length, data.size) {
+        for ((y,line) in data.withIndex()) for ((x, c) in line.withIndex()) mp[y][x] = c
+    }
+
+    fun contains(loc:XY):Boolean {
+        return (loc.x in 0 until xdim && loc.y in 0 until ydim)
+    }
 
     // the actual map accessible with [y][x] sequence
     val mp = mutableListOf<MutableList<Char>>().apply { repeat(ydim) { this.add( MutableList(xdim) { default })} }
@@ -199,6 +211,8 @@ class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
     fun get(x:Int, y:Int) = mp[y][x]
     fun set(xy:XY, value:Char) { mp[xy.y][xy.x] = value }
     fun set(x:Int, y:Int, value:Char) { mp[y][x] = value }
+    fun getRow(y:Int):List<Char> = mp[y]
+    fun getCol(x:Int):List<Char> = rowIx.map { mp[it][x] }
 
     // sets a line value
     fun setLine(y:Int, ln:List<Char>) {
