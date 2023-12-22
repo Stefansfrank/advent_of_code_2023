@@ -23,7 +23,7 @@ data class XY(val x: Int, val y: Int) {
     fun mv(dir: Int, box:Rect) = XY( (x + delX[dir]).coerceIn(box.xRange()), (y + delY[dir]).coerceIn(box.yRange()))
 
     // returns the 4 or 8 neighbours depending on the flag 'diagonal'
-    fun neighbors(diagonal: Boolean):List<XY> {
+    fun neighbors(diagonal: Boolean = false, wrap: Rect? = null):List<XY> {
         var delX = listOf(0, 1, 0, -1)
         var delY = listOf(-1, 0, 1, 0)
         if (diagonal) {
@@ -31,7 +31,8 @@ data class XY(val x: Int, val y: Int) {
             delY = listOf(-1, -1, 0, 1, 1, 1, 0, -1)
         }
         var i = 0
-        return List(if (diagonal) 8 else 4) { XY(x + delX[i], y + delY[i++]) }
+        return if (wrap == null) List(if (diagonal) 8 else 4) { XY(x + delX[i], y + delY[i++]) }
+            else List(if (diagonal) 8 else 4) { wrap.wrap(XY(x + delX[i], y + delY[i++])) }
     }
 
     // Manhattan distance to origin or another point
@@ -43,6 +44,10 @@ data class XY(val x: Int, val y: Int) {
 
     // The signum function for the whole point
     fun sign() = XY(x.sign, y.sign)
+
+    override fun equals(o:Any?):Boolean {
+        return (x == (o as XY).x && y == o.y)
+    }
 }
 
 // a rectangle defined with the corner points
@@ -59,6 +64,19 @@ data class Rect(val from:XY, val to:XY) {
 
     // size
     fun size() = abs((1L + to.y - from.y) *(1L + to.x - from.x))
+
+    fun wrap(loc: XY): XY {
+        var nLoc = loc
+        if (loc.x !in xRange()) {
+            if (loc.x > stdTo.x) nLoc = XY(stdFrom.x + (loc.x - stdTo.x) - 1, loc.y)
+            if (loc.x < stdFrom.x) nLoc = XY(stdTo.x - (stdFrom.x - loc.x) + 1, loc.y)
+        }
+        if (loc.y !in yRange()) {
+            if (loc.y > stdTo.y) nLoc = XY( loc.x,stdFrom.y + (loc.y - stdTo.y) - 1)
+            if (loc.x < stdFrom.y) nLoc = XY(loc.x,stdTo.y - (stdFrom.y - loc.y) + 1)
+        }
+        return nLoc
+    }
 }
 
 // a 2d mutable list of Booleans of dimensions xDim, yDim
@@ -133,6 +151,7 @@ class Mask(val xdim:Int, val ydim:Int, private val default:Boolean = false,
     fun on(x:Int, y:Int)  = set(x, y, true)
     fun off(x:Int, y:Int) = set(x, y, false)
     fun tgl(x:Int, y:Int) = set(x, y, !get(x, y))
+
 }
 
 // a 2D integer map of dimensions xdim, ydim
@@ -222,6 +241,15 @@ class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
     // prints out a representation to stdout
     fun print() = mp.forEach { it.forEach{ i -> print(i) }; println() }
 
+    // find
+    fun find(c:Char):XY? {
+        for (y in 0 until ydim) {
+            for (x in 0 until xdim) {
+                if (mp[y][x] == c) return XY(x,y)
+            }
+        }
+        return null
+    }
 }
 
 // a generic 2D map
