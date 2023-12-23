@@ -30,12 +30,12 @@ class Day23: Solver {
             val initPath = Path(XY(1, 1)).apply { this.vis.on(XY(1, 0)); this.vis.on(1, 1) }
             val open = ArrayDeque<Path>().apply { this.add(initPath) }
 
-            // BFS to build graph between nodes (crossings)
+            // BFS to build weighted graph between nodes (crossings)
             while (open.isNotEmpty()) {
                 val path = open.removeFirst()
                 val next = mutableListOf<XY>()
 
-                // determine next positions
+                // determine next valid positions
                 if (path.loc != finish) {
                     for ((ix, loc) in path.loc.neighbors().withIndex()) {
                         val cc = map.get(path.loc)
@@ -45,7 +45,8 @@ class Day23: Solver {
                     }
                 }
 
-                // add branches to queue
+                // if crossing add to segment list
+                // if crossing and not visited, kick off new paths from the crossing
                 if (next.size > 1 || path.loc == finish) {
                     if (nodes[path.loc] == null) {
                         nodes[path.loc] = ndCnt++
@@ -55,7 +56,7 @@ class Day23: Solver {
                     }
                     segs[Seg(path.from, path.loc)] = max(path.vis.cnt() - 1, segs[Seg(path.from, path.loc)] ?: 0)
 
-                // continue current path
+                // no crossing: continue walking the current path
                 } else if (next.size == 1) {
                     open.add(path.apply {
                         this.loc = next.first()
@@ -64,7 +65,7 @@ class Day23: Solver {
                 }
             }
 
-            // map segments to a more convenient formaat
+            // map segment list to a more convenient format listing all possible goals per crossing
             val segsIx = MutableList(nodes.size) { mutableListOf<Target>() }
             for (si in segs) {
                 segsIx[nodes[si.key.from]!!].add(Target(nodes[si.key.to]!!, si.value))
@@ -81,13 +82,12 @@ class Day23: Solver {
                 val gpath = gPaths.removeLast()
                 for (next in segsIx[gpath.curNd].distinct()) {
                     if (gpath.visNd[next.node]) continue
-                    if (next.node == 1) {
+                    if (next.node == 1) { // exit reached
                         maxDist = max(gpath.sum + next.dist, maxDist)
                         continue
                     }
                     gPaths.add(GPath(next.node, gpath.sum + next.dist,
-                        gpath.visNd.toMutableList().apply { this[next.node] = true }).also {
-                    })
+                        gpath.visNd.toMutableList().apply { this[next.node] = true }))
                 }
             }
             println("Part $part: $red$bold${maxDist}$reset")
