@@ -89,6 +89,9 @@ class Mask(val xdim:Int, val ydim:Int, private val default:Boolean = false,
         mutableListOf<MutableList<Boolean>>().apply {
             for (y in 0 until temp.ydim) { this.add( temp.msk[y].toMutableList() )}})
 
+    // constructor using another mask as template
+    constructor(temp:MapChar): this(temp.xdim, temp.ydim)
+
     // the underlying mask accessible with [y][x] sequence
     val msk = defMsk
         ?: mutableListOf<MutableList<Boolean>>().apply {

@@ -10,6 +10,7 @@ class Day21 : Solver {
         val map = MapChar(readTxtFile(file))
         val start = map.find('S')!!
         map.set(start, '.')
+        val dim = map.xdim
 
         // BFS to determine all possible locations with their shortest distance to start
         data class Vis(val loc:XY, val dst:Int)
@@ -21,13 +22,11 @@ class Day21 : Solver {
             visited[loc.loc] = loc.dst
             locQue.addAll(loc.loc.neighbors(false).map { Vis(it, loc.dst + 1) })
         }
-        println("Part 1: $red$bold${visited.filter { it.value <= 64 && it.value % 2 == 0}.size}$reset")
-
-        val dim = map.xdim
+        println("Part 1: $red$bold${visited.filter { it.value < dim/2 && it.value % 2 == 0}.size}$reset")
 
         // the areas if corners that are cut off or added
-        val evnCornArea = visited.filter { it.value > 65 && it.value % 2 == 0 }.size
-        val oddCornArea = visited.filter { it.value > 65 && it.value % 2 == 1 }.size
+        val evnCornArea = visited.filter { it.value > dim/2 && it.value % 2 == 0 }.size
+        val oddCornArea = visited.filter { it.value > dim/2 && it.value % 2 == 1 }.size
 
         // the max amount of box repetitions
         val reps = (((26501365) - dim/2) / dim).toLong()
