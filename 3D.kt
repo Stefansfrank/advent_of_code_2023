@@ -2,6 +2,14 @@ package com.sf.aoc
 
 import kotlin.math.abs
 
+// 3D point in Long
+data class XYZL(var x: Long, var y: Long, var z: Long) {
+    fun add(vec:XYZL) = XYZL(x + vec.x, y + vec.y, z + vec.z)
+}
+
+// create point from list of Long
+fun xyzFromListL(inp: List<Long>) = XYZL(inp[0],inp[1],inp[2])
+
 data class XYZ(val x: Int, val y: Int, val z: Int) {
     fun add(vec:XYZ) = XYZ(x + vec.x, y + vec.y, z + vec.z)
 }
