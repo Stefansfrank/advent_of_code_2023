@@ -32,7 +32,7 @@ data class XY(val x: Int, val y: Int) {
         }
         var i = 0
         return if (wrap == null) List(if (diagonal) 8 else 4) { XY(x + delX[i], y + delY[i++]) }
-            else List(if (diagonal) 8 else 4) { wrap.wrap(XY(x + delX[i], y + delY[i++])) }
+        else List(if (diagonal) 8 else 4) { wrap.wrap(XY(x + delX[i], y + delY[i++])) }
     }
 
     // Manhattan distance to origin or another point
@@ -47,6 +47,46 @@ data class XY(val x: Int, val y: Int) {
 
     override fun equals(o:Any?):Boolean {
         return (x == (o as XY).x && y == o.y)
+    }
+}
+
+// a point with coordinates c and y
+data class XYL(val x: Long, val y: Long) {
+
+    // adds a vector to a point
+    fun add(p:XYL) = XYL(x + p.x, y + p.y)
+    fun sub(p:XYL) = XYL( x - p.x, y - p.y)
+    fun add(px:Long, py:Long) = XYL(x + px, y + py)
+    fun sub(px:Long, py:Long) = XYL( x - px, y - py)
+
+    // returns the next point in the given direction
+    // (0 = up, 1 = right, 2 = down, 3 = left)
+    private val delX = listOf(0, 1, 0, -1)
+    private val delY = listOf(-1, 0, 1, 0)
+    fun mv(dir: Int) = XYL( x + delX[dir], y + delY[dir])
+    fun mv(dir: Int, dist: Long) = XYL( x + delX[dir] * dist, y + delY[dir] * dist)
+
+    // returns the 4 or 8 neighbours depending on the flag 'diagonal'
+    fun neighbors(diagonal: Boolean = false):List<XYL> {
+        var delX = listOf(0, 1, 0, -1)
+        var delY = listOf(-1, 0, 1, 0)
+        if (diagonal) {
+            delX = listOf(0, 1, 1, 1, 0, -1, -1, -1)
+            delY = listOf(-1, -1, 0, 1, 1, 1, 0, -1)
+        }
+        var i = 0
+        return List(if (diagonal) 8 else 4) { XYL(x + delX[i], y + delY[i++]) }
+    }
+
+    // Manhattan distance to origin or another point
+    fun mDist() = abs(x) + abs(y)
+    fun mDist(p: XYL) = abs(p.x - x) + abs(p.y - y)
+
+    // The highest absolute coordinate value
+    fun maxAbs() = max(abs(x), abs(y))
+
+    override fun equals(o:Any?):Boolean {
+        return (x == (o as XYL).x && y == o.y)
     }
 }
 
