@@ -12,6 +12,8 @@ fun xyzFromListL(inp: List<Long>) = XYZL(inp[0],inp[1],inp[2])
 
 data class XYZ(val x: Int, val y: Int, val z: Int) {
     fun add(vec:XYZ) = XYZ(x + vec.x, y + vec.y, z + vec.z)
+    fun del(vec:XYZ) = XYZ(vec.x - x, vec.y - y, vec.z - z)
+    fun length() = x + y + z
 }
 
 fun xyzFromList(inp: List<Int>) = XYZ(inp[0],inp[1],inp[2])

@@ -316,7 +316,7 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
     fun set(op: (Int, Int) -> (T), bx: Rect = Rect(XY(0, 0), XY(xdim, ydim))) {
         mp.forEachIndexed { y, ln ->
             if (y in bx.yRange())
-                ln.forEachIndexed { x, vl ->
+                ln.forEachIndexed { x, _ ->
                     if (x in bx.xRange())
                         mp[y][x] = op(x, y)
                 }
@@ -327,7 +327,7 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
     fun mod(op: (T, Int, Int) -> (T), bx: Rect = Rect(XY(0, 0), XY(xdim, ydim))) {
         mp.forEachIndexed { y, ln ->
             if (y in bx.yRange())
-                ln.forEachIndexed { x, vl ->
+                ln.forEachIndexed { x, _ ->
                     if (x in bx.xRange())
                         mp[y][x] = op(mp[y][x], x, y)
                 }
