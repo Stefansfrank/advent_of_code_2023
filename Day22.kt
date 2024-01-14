@@ -28,8 +28,8 @@ class Day22 : Solver {
                 else -> listOf(XY(start.x, start.y)) }
             val height = if (dir == 2) abs(len) + 1 else 1
             blocks.add(Block(start.z, height, p2D))
-            blocks.sortBy { it.z } // as this is a snapshot, we need to fall them in order
         }
+        blocks.sortBy { it.z } // as this is a snapshot, we need to fall them in order
 
         // height map describes in the XY-plane for each xy coordinate
         // - the current height of blocks
@@ -74,11 +74,12 @@ class Day22 : Solver {
             // remove block from dependencies and add all newly unstable blocks to queue
             while (disQue.isNotEmpty()) {
                 val dis = disQue.removeFirst()
-                depNet.forEach { it.restsOn.remove(dis) }
                 depNet.forEachIndexed { ix, dep ->
-                    if (dep.restsOn.size == 0 && (!dep.gone)) { disQue.add(ix); depNet[ix].gone = true } }
+                    dep.restsOn.remove(dis)
+                    if (dep.restsOn.size == 0 && !dep.gone) { disQue.add(ix); depNet[ix].gone = true }
+                }
             }
-            
+
             // count disintegrated blocks
             chainCount += depNet.filter { it.gone }.size
         }
