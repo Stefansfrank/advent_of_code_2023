@@ -24,11 +24,14 @@ class Day17 : Solver {
                 XY(0, 0).neighbors().mapIndexed { ix, xy -> Path(xy, ix, 1) }
                 .filter { mpBox.contains(it.loc) }.forEach { qq.add(it); costs[it] = mp.get(it.loc) } }
 
-            // it's fastest to go through all paths and find the best at the end
-            // cpmpared to always finding the shortest and stop when the end is encountered
+            // it's faster to go through all possible paths and find the best on that reaches finish at the end
+            // compared to always continue the shortest path and stop when the end is encountered the first time
             while (que.isNotEmpty()) {
                 val path = que.removeFirst()
                 for ((dir, next) in path.loc.neighbors().withIndex()) {
+
+                    // don't continue if you are already at the end
+                    if (path.loc == fin) continue
 
                     // no turnaround
                     if ((dir + 2) % 4 == path.dir) continue
@@ -39,7 +42,7 @@ class Day17 : Solver {
                     // enforce min straight line
                     if (path.rpt < 4 * part && dir != path.dir) continue
 
-                    // catch out of the box
+                    // catch if out of the box
                     if (!mpBox.contains(next)) continue
 
                     // ok, let's look at this path
