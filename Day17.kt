@@ -35,7 +35,7 @@ class Day17 : Solver {
                     if (path.loc == fin) continue
 
                     // no turnaround
-                    if ((dir + 2) % 4 == path.dir) continue
+                    if (dir.isOpposing(path.dir)) continue
 
                     // enforce max straight line
                     if (path.rpt == 3 + 7 * part && dir == path.dir) continue

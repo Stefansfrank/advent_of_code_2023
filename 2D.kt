@@ -299,7 +299,11 @@ class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
 class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
 
     // the actual map accessible with [y][x] sequence
-    val mp = (0 until ydim).map{ y -> (0 until xdim).map { x -> default(x, y) }.toMutableList() }
+    val mp = (0 until ydim).map{ y ->
+        (0 until xdim).map { x -> default(x, y) }.toMutableList() }.toMutableList()
+    val rowIx = (0 until xdim).toList()
+    val colIx = (0 until ydim).toList()
+    val xyIx:List<XY> = colIx.fold(mutableListOf()) { lst, y -> (lst + rowIx.map { x -> XY(x,y)}).toMutableList()}
 
     // adds simple XY getter / setter
     fun get(xy: XY): T = mp[xy.y][xy.x]
@@ -307,9 +311,19 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
         mp[xy.y][xy.x] = value
     }
 
+    // adds standard getter / setter
     fun get(x: Int, y: Int): T = mp[y][x]
     fun set(x: Int, y: Int, value: T) {
         mp[y][x] = value
+    }
+
+    // adds row/col getters
+    fun getRow(y:Int):List<T> = mp[y]
+    fun getCol(x:Int):List<T> = rowIx.map { mp[it][x] }
+
+    // sets a row
+    fun setRow(y:Int, ln:List<T>) {
+        mp[y] = ln.toMutableList()
     }
 
     // sets content of a whole region using lambda (x,y)
@@ -333,11 +347,36 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
                 }
         }
     }
+
+    // executes on each content
+    fun exec(op: (T, Int, Int) -> Unit, bx: Rect = Rect(XY(0, 0), XY(xdim, ydim))) {
+        mp.forEachIndexed { y, ln ->
+            if (y in bx.yRange())
+                ln.forEachIndexed { x, _ ->
+                    if (x in bx.xRange())
+                        op(mp[y][x], x, y)
+            }
+        }
+    }
+
+    // finds an entry
+    fun find(entry:T):XY? {
+        for (y in 0 until ydim) {
+            for (x in 0 until xdim) {
+                if (mp[y][x] == entry) return XY(x,y)
+            }
+        }
+        return null
+    }
+
+    // prints out a representation to stdout
+    fun print(op: (T) -> String = { t -> t.toString() }) = mp.forEach { it.forEach{ i -> print(i) }; println() }
 }
 
 // these should be used on Directions
 fun (Int).isVertical():Boolean = (this == 1 || this == 3)
 fun (Int).isDescending():Boolean = (this == 0 || this == 3)
+fun (Int).isOpposing(od:Int):Boolean = ((this + 2) % 4 == od)
 
 
 
