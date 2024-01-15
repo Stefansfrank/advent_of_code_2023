@@ -14,6 +14,7 @@ class Day17 : Solver {
         // a Path as defined by a location, current direction and # of repeated steps in that direction
         data class Path (val loc:XY, val dir:Int, val rpt:Int)
 
+        // The two parts are different just in path restrictions
         for (part in 0 .. 1) {
 
             // minimal cost for each path
@@ -39,13 +40,13 @@ class Day17 : Solver {
                     // enforce max straight line
                     if (path.rpt == 3 + 7 * part && dir == path.dir) continue
 
-                    // enforce min straight line
+                    // enforce min straight line (will not do anything in part 1)
                     if (path.rpt < 4 * part && dir != path.dir) continue
 
-                    // catch if out of the box
+                    // catch if out of the bounding box
                     if (!mpBox.contains(next)) continue
 
-                    // ok, let's look at this path
+                    // ok, let's construct this path
                     val nPath = Path(next, dir, if (dir == path.dir) path.rpt + 1 else 1)
                     val nCost = costs[path]!! + mp.get(next)
 
