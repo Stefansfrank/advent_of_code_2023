@@ -45,8 +45,8 @@ data class XY(val x: Int, val y: Int) {
     // The signum function for the whole point
     fun sign() = XY(x.sign, y.sign)
 
-    override fun equals(o:Any?):Boolean {
-        return (x == (o as XY).x && y == o.y)
+    override fun equals(other:Any?):Boolean {
+        return (x == (other as XY).x && y == other.y)
     }
 }
 
@@ -85,8 +85,8 @@ data class XYL(val x: Long, val y: Long) {
     // The highest absolute coordinate value
     fun maxAbs() = max(abs(x), abs(y))
 
-    override fun equals(o:Any?):Boolean {
-        return (x == (o as XYL).x && y == o.y)
+    override fun equals(other:Any?):Boolean {
+        return (x == (other as XYL).x && y == other.y)
     }
 }
 
@@ -198,14 +198,8 @@ class Mask(val xdim:Int, val ydim:Int, private val default:Boolean = false,
 }
 
 // a 2D integer map of dimensions xdim, ydim
-class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
-
-    // the actual map accessible with [y][x] sequence
-    val mp = mutableListOf<MutableList<Int>>().apply { repeat(ydim) { this.add( MutableList(xdim) { default })} }
-
-    val rowIx = (0 until xdim).toList()
-    val colIx = (0 until ydim).toList()
-    val xyIx:List<XY> = colIx.fold(mutableListOf()) { lst, y -> (lst + rowIx.map { x -> XY(x,y)}).toMutableList()}
+class MapInt(private val xin:Int, private val yin:Int, private val default:Int = 0) :
+    Map<Int>(xin, yin, { _, _ -> default}) {
 
     // adds n to a whole region (defaults n = 1, region = all map)
     fun add(n: Int = 1, bx: Rect = Rect(XY(0,0), XY(xdim, ydim))) {
@@ -228,23 +222,10 @@ class MapInt(val xdim:Int, val ydim:Int, private val default:Int = 0) {
     // adds all values of the map together
     fun cnt() = mp.fold(0) { acc, ln -> acc + ln.fold(0) { acc2, n -> acc2 + n } }
 
-    // adds simple XY getter / setter
-    fun get(xy:XY):Int = mp[xy.y][xy.x]
-    fun get(x:Int, y:Int) = mp[y][x]
-    fun set(xy:XY, value:Int) { mp[xy.y][xy.x] = value }
-    fun set(x:Int, y:Int, value:Int) { mp[y][x] = value }
-
     // sets a line value
     fun setLine(y:Int, ln:List<Int>) {
        mp[y] = ln.toMutableList()
     }
-
-    fun contains(loc:XY):Boolean {
-        return (loc.x in 0 until xdim && loc.y in 0 until ydim)
-    }
-
-    // prints out a representation to stdout
-    fun print() = mp.forEach { it.forEach{ i -> print(i) }; println() }
 
     // prints out a representation to stdout
     fun printChar() = mp.forEach { it.forEach{ i -> print(i.toChar()) }; println() }
@@ -296,7 +277,7 @@ class MapChar(val xdim:Int, val ydim:Int, private val default:Char = '.') {
 }
 
 // a generic 2D map
-class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
+open class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
 
     // the actual map accessible with [y][x] sequence
     val mp = (0 until ydim).map{ y ->
@@ -304,6 +285,10 @@ class Map<T>(val xdim:Int, val ydim:Int, private val default: (Int, Int) -> T) {
     val rowIx = (0 until xdim).toList()
     val colIx = (0 until ydim).toList()
     val xyIx:List<XY> = colIx.fold(mutableListOf()) { lst, y -> (lst + rowIx.map { x -> XY(x,y)}).toMutableList()}
+
+    fun contains(loc:XY):Boolean {
+        return (loc.x in 0 until xdim && loc.y in 0 until ydim)
+    }
 
     // adds simple XY getter / setter
     fun get(xy: XY): T = mp[xy.y][xy.x]
