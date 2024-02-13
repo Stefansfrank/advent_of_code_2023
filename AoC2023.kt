@@ -16,11 +16,12 @@ interface Solver {
 
 fun main(args: Array<String>) {
 
-    val start = System.nanoTime()
-
     println("\nAoC 2023 - Day $yellow$bold${args[0]}$reset - File: $yellow${bold}d${args[0]}.${args[1]}.txt$reset\n")
     val kClass = Class.forName("com.sf.aoc2023.Day${args[0]}").kotlin
-    kClass.members.filter { it.name == "solve" }[0].call( kClass.createInstance(), "src/main/kotlin/Data/d${args[0]}.${args[1]}.txt" )
+    val solveFun = kClass.members.filter { it.name == "solve" }[0]
+    val day = kClass.createInstance()
 
+    val start = System.nanoTime()
+    solveFun.call( day, "src/main/kotlin/Data/d${args[0]}.${args[1]}.txt" )
     println("\nElapsed time: $green$bold${"%,d".format(System.nanoTime()-start)}$reset ns")
 }
